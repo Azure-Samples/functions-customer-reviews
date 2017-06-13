@@ -1,0 +1,88 @@
+﻿@model CatsReviewApp.Models.CreateCatReview
+
+@{
+    ViewBag.Title = "Create";
+}
+
+@using (Html.BeginForm(null, null, FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal create-page">
+        <div class="row header">
+            <div class="col-md-6">
+                <h2>Add Picture</h2>
+            </div>
+            <div class="col-md-6">
+                <a href="@Url.Action("Index")" class="button back-button">
+                    <i class="glyphicon glyphicon-backward"></i> return to reviews
+                </a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                <label for="@Html.NameFor(model => model.Image)" id="upload-preview">
+                    <span class="no-image">
+                        <i class="glyphicon glyphicon-plus"></i>
+                        Image
+                    </span>
+                </label>
+            </div>
+            <div class="col-md-8">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Image, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.TextBoxFor(model => model.Image, htmlAttributes: new { type = "file", @class = "file-picker form-control", onchange = "previewImage(this);" })
+                        <label for="@Html.NameFor(model => model.Image)" style="width: 100%">
+                            <input type="text" disabled id="file-name" class="form-control" />
+                        </label>
+                        @Html.ValidationMessageFor(model => model.Image, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.ReviewText, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.ReviewText, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.ReviewText, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-2"></div>
+                    <div class="col-md-10">
+                        <input type="submit" value="Create" class="button" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script type="text/javascript">
+        function previewImage(input) {
+            var preview = $("#upload-preview");
+            var fileName = $("#file-name");
+            var file = input.files[0];
+
+            if (!file) {
+                fileName.val("");
+                preview.css("background-image", "").removeClass("file-selected");
+            } else {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.css("background-image", "url(" + e.target.result + ")").addClass("file-selected");
+                    fileName.val(file.name);
+                };
+
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
+}

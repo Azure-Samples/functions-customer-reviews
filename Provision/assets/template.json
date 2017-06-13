@@ -1,0 +1,373 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "unique_name": {
+            "type": "string"
+        }
+    },
+    "variables": {
+        "WebSiteName": "[concat(parameters('unique_name'),'site')]",
+        "DocumentDBName": "[concat(parameters('unique_name'),'docdb')]",
+        "StorageAccountName": "[concat(parameters('unique_name'),'stor')]",
+        "AppInsightsInstanceName": "[concat(parameters('unique_name'),'insights')]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.CognitiveServices/accounts",
+            "sku": {
+                "name": "S1"
+            },
+            "kind": "ComputerVision",
+            "name": "[concat(parameters('unique_name'),'computervision')]",
+            "apiVersion": "2016-02-01-preview",
+            "location": "westus",
+            "properties": {},
+            "dependsOn": []
+        },
+        {
+            "type": "Microsoft.CognitiveServices/accounts",
+            "sku": {
+                "name": "S0"
+            },
+            "kind": "ContentModerator",
+            "name": "[concat(parameters('unique_name'),'contentmoderator')]",
+            "apiVersion": "2016-02-01-preview",
+            "location": "westus",
+            "properties": {},
+            "dependsOn": []
+        },
+        {
+            "type": "Microsoft.DocumentDB/databaseAccounts",
+            "kind": "GlobalDocumentDB",
+            "name": "[variables('DocumentDBName')]",
+            "apiVersion": "2015-04-08",
+            "location": "West US",
+            "tags": {},
+            "properties": {
+                "databaseAccountOfferType": "Standard",
+                "consistencyPolicy": {
+                    "defaultConsistencyLevel": "Session",
+                    "maxIntervalInSeconds": 5,
+                    "maxStalenessPrefix": 100
+                },
+                "name": "[concat(parameters('unique_name'),'docdb')]"
+            },
+            "dependsOn": []
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "sku": {
+                "name": "Standard_RAGRS",
+                "tier": "Standard"
+            },
+            "kind": "Storage",
+            "name": "[variables('StorageAccountName')]",
+            "apiVersion": "2016-01-01",
+            "location": "westus",
+            "tags": {},
+            "properties": {},
+            "dependsOn": []
+        },
+        {
+            "type": "Microsoft.Web/serverfarms",
+            "sku": {
+                "name": "S1",
+                "tier": "Standard",
+                "size": "S1",
+                "family": "S",
+                "capacity": 1
+            },
+            "kind": "app",
+            "name": "[concat(parameters('unique_name'),'farm')]",
+            "apiVersion": "2015-08-01",
+            "location": "West US",
+            "properties": {
+                "name": "[concat(parameters('unique_name'),'farm')]",
+                "numberOfWorkers": 1
+            },
+            "dependsOn": []
+        },
+        {
+            "type": "microsoft.insights/components",
+            "kind": "other",
+            "name": "[variables('AppInsightsInstanceName')]",
+            "apiVersion": "2014-04-01",
+            "location": "southcentralus",
+            "properties": {
+                "ApplicationId": "[variables('AppInsightsInstanceName')]"
+            },
+            "dependsOn": []
+        },
+        {
+            "type": "Microsoft.Web/sites",
+            "kind": "app",
+            "name": "[concat(parameters('unique_name'),'site')]",
+            "apiVersion": "2015-08-01",
+            "location": "West US",
+            "properties": {
+                "name": "[concat(parameters('unique_name'),'site')]",
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', concat(parameters('unique_name'),'farm'))]"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', concat(parameters('unique_name'),'farm'))]",
+                "[resourceId('Microsoft.Storage/storageAccounts', concat(parameters('unique_name'),'stor'))]",
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', variables('DocumentDBName'))]"
+            ],
+            "resources": [
+            {
+                "name": "appsettings",
+                "type": "config",
+                "apiVersion": "2015-08-01",
+                "dependsOn": [
+                    "[resourceId('Microsoft.Web/sites', variables('WebSiteName'))]"
+                ],
+                "properties": {
+                    "documentDbEndpoint": "[reference(concat('Microsoft.DocumentDb/databaseAccounts/', variables('DocumentDBName'))).documentEndpoint]",
+                    "documentDbKey": "[listKeys(resourceId('Microsoft.DocumentDb/databaseAccounts', variables('DocumentDBName')), '2015-04-08').primaryMasterKey]",
+                    "documentDbName": "customerReviewData",
+                    "documentDbColl": "reviews","storageAccountConnectionString": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('StorageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value)]",
+                    "containerName": "input-images",
+                    "queueName": "review-queue",
+                    "iKey": "[reference(resourceId('Microsoft.Insights/components', variables('AppInsightsInstanceName')), '2014-04-01').InstrumentationKey]"
+                }
+            }
+            ]
+        },
+        {
+            "name": "ReviewsDashboard",
+            "type": "Microsoft.Portal/dashboards",
+            "location": "centralus",
+            "apiVersion": "2015-08-01-preview",
+            "tags": {
+                "hidden-title": "Reviews Insights"
+            },
+            "properties": {
+                "lenses": {
+                "0": {
+                    "order": 0,
+                    "parts": {
+                    "0": {
+                        "position": {
+                        "x": 0,
+                        "y": 0,
+                        "rowSpan": 4,
+                        "colSpan": 6
+                        },
+                        "metadata": {
+                        "inputs": [
+                            {
+                            "name": "ComponentId",
+                            "value": {
+                                "SubscriptionId": "[subscription().subscriptionId]",
+                                "ResourceGroup": "[resourceGroup().name]",
+                                "Name": "[variables('AppInsightsInstanceName')]"
+                            }
+                            },
+                            {
+                            "name": "Query",
+                            "value": "set truncationmaxrecords= 1000;\ncustomMetrics\n| project name, value\n| extend ModerationResult =\n          iff (name == \"ModerationResult\" and value == 0, \"Passed\",\n          iff (name == \"ModerationResult\" and value == 1, \"Failed text\",\n          iff (name == \"ModerationResult\" and value == 2, \"Failed image\",\n          iff (name == \"ModerationResult\" and value == 3, \"Failed text and image\", \"Unknown\"))))\n| where ModerationResult != \"Unknown\"\n| summarize count() by ModerationResult\n| render columnchart\n| project ModerationResult, count_\n| order by ModerationResult desc"
+                            },
+                            {
+                            "name": "TimeRange",
+                            "value": "P7D"
+                            },
+                            {
+                            "name": "Dimensions",
+                            "value": {
+                                "xAxis": {
+                                "name": "ModerationResult",
+                                "type": "String"
+                                },
+                                "yAxis": [
+                                {
+                                    "name": "count_",
+                                    "type": "Int64"
+                                }
+                                ],
+                                "splitBy": [],
+                                "aggregation": "Sum"
+                            }
+                            },
+                            {
+                            "name": "Version",
+                            "value": "1.0"
+                            },
+                            {
+                            "name": "DashboardId",
+                            "value": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Portal/dashboards/ReviewsDashboard')]"
+                            },
+                            {
+                            "name": "PartId",
+                            "value": "a71f7336-8ac0-4c3b-90b5-e3af23306482"
+                            },
+                            {
+                            "name": "PartTitle",
+                            "value": "Analytics"
+                            },
+                            {
+                            "name": "PartSubTitle",
+                            "value": "Reviews"
+                            },
+                            {
+                            "name": "resourceTypeMode",
+                            "value": "components"
+                            }
+                        ],
+                        "type": "Extension/AppInsightsExtension/PartType/AnalyticsDonutPart",
+                        "settings": {},
+                        "asset": {
+                            "idInputName": "ComponentId",
+                            "type": "ApplicationInsights"
+                        }
+                        }
+                    },
+                    "1": {
+                        "position": {
+                        "x": 6,
+                        "y": 0,
+                        "rowSpan": 4,
+                        "colSpan": 6
+                        },
+                        "metadata": {
+                        "inputs": [
+                            {
+                            "name": "ComponentId",
+                            "value": {
+                                "SubscriptionId": "[subscription().subscriptionId]",
+                                "ResourceGroup": "[resourceGroup().name]",
+                                "Name": "[variables('AppInsightsInstanceName')]"
+                            }
+                            },
+                            {
+                            "name": "MetricsExplorerJsonDefinitionId",
+                            "value": "InsightsTimelineMetrics"
+                            },
+                            {
+                            "name": "TimeContext",
+                            "value": {
+                                "durationMs": 86400000,
+                                "endTime": null,
+                                "createdTime": "2017-04-26T20:55:14.198Z",
+                                "isInitialTime": true,
+                                "grain": 1,
+                                "useDashboardTimeRange": false
+                            }
+                            },
+                            {
+                            "name": "Version",
+                            "value": "1.0"
+                            }
+                        ],
+                        "type": "Extension/AppInsightsExtension/Blade/GeneralAppOverview/Lens/ApplicationHealthLens/PartInstance/InsightsTimeline_MetricsExplorerPartReferenceOveriew",
+                        "asset": {
+                            "idInputName": "ComponentId",
+                            "type": "ApplicationInsights"
+                        }
+                        }
+                    },
+                    "2": {
+                        "position": {
+                        "x": 12,
+                        "y": 0,
+                        "rowSpan": 4,
+                        "colSpan": 2
+                        },
+                        "metadata": {
+                        "inputs": [
+                            {
+                            "name": "resourceGroup",
+                            "value": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name)]"
+                            }
+                        ],
+                        "type": "Extension/HubsExtension/PartType/ResourceGroupMapPinnedPart",
+                        "viewState": {
+                            "content": {
+                            "selectableData": {}
+                            }
+                        },
+                        "asset": {
+                            "idInputName": "resourceGroup",
+                            "type": "ResourceGroups"
+                        },
+                        "defaultMenuItemId": "overview"
+                        }
+                    },
+                    "3": {
+                        "position": {
+                        "x": 0,
+                        "y": 4,
+                        "rowSpan": 5,
+                        "colSpan": 14
+                        },
+                        "metadata": {
+                        "inputs": [
+                            {
+                            "name": "ComponentId",
+                            "value": {
+                                "SubscriptionId": "[subscription().subscriptionId]",
+                                "ResourceGroup": "[resourceGroup().name]",
+                                "Name": "[variables('AppInsightsInstanceName')]"
+                            }
+                            },
+                            {
+                            "name": "DashboardTimeRange",
+                            "binding": "timeRange",
+                            "isOptional": true
+                            },
+                            {
+                            "name": "DataModel",
+                            "isOptional": true
+                            },
+                            {
+                            "name": "TimeContext",
+                            "value": {
+                                "durationMs": 86400000,
+                                "endTime": null,
+                                "createdTime": "2017-04-26T20:23:45.99Z",
+                                "isInitialTime": true,
+                                "grain": 1,
+                                "useDashboardTimeRange": false
+                            },
+                            "isOptional": true
+                            },
+                            {
+                            "name": "ConfigurationId",
+                            "value": "34f36974-2e50-41c2-8add-c97de8ae1129",
+                            "isOptional": true
+                            }
+                        ],
+                        "type": "Extension/AppInsightsExtension/PartType/TopologyV2AdaptedPart",
+                        "settings": {
+                            "content": {
+                            "DataModelJSON": "{\"sortMetric\":\"Telemetry count\",\"sortOrder\":2,\"filters\":[],\"warningThreshold\":5,\"criticalThreshold\":20,\"nodeConfigurations\":[],\"timeContext\":{\"durationMs\":604800000,\"endTime\":null,\"createdTime\":\"2017-04-27T17:20:44.864Z\",\"isInitialTime\":false,\"grain\":1,\"useDashboardTimeRange\":false},\"userSelectedActiveOnlySetting\":true,\"hasActiveNodes\":false,\"hasNotConfiguredNodes\":false,\"showActiveNodesOnly\":true}"
+                            }
+                        },
+                        "isAdapter": true,
+                        "asset": {
+                            "idInputName": "ComponentId",
+                            "type": "ApplicationInsights"
+                        },
+                        "defaultMenuItemId": "applicationMap"
+                        }
+                    }
+                    }
+                }
+                },
+                "metadata": {
+                    "model": {
+                        "timeRange": {
+                            "value": {
+                                "relative": {
+                                "duration": 24,
+                                "timeUnit": 1
+                                }
+                            },
+                            "type": "MsPortalFx.Composition.Configuration.ValueTypes.TimeRange"
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}

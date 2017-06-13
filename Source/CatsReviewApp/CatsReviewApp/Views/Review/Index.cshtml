@@ -1,0 +1,53 @@
+﻿@model IEnumerable<CatsReviewApp.Models.CatReview>
+
+@{
+    ViewBag.Title = "Reviews";
+
+    var tabDefinitions = new[]
+    {
+        new { Name = "Approved", Images = Model.Where(i => i.IsApproved == true).ToList(), Active = true },
+        new { Name = "Rejected", Images = Model.Where(i => i.IsApproved == false).ToList(), Active = false },
+        new { Name = "Pending", Images = Model.Where(i => !i.IsApproved.HasValue).ToList(), Active = false },
+    };
+}
+
+<div class="container-fluid grid-page">
+    <div class="row">
+        <div class="col-md-4 col-md-offset-8">
+            <a href="@Url.Action("Create")" class="button">
+                <i class="glyphicon glyphicon-plus"></i> add picture
+            </a>
+        </div>
+    </div>
+
+    <div>
+        <ul class="nav nav-tabs" role="tablist">
+            @foreach (var tab in tabDefinitions)
+            {
+                <li role="presentation" class="@(tab.Active ? "active" : "")"><a href="#@tab.Name" aria-controls="@tab.Name" role="tab" data-toggle="tab">@tab.Name (@tab.Images.Count)</a></li>
+            }
+        </ul>
+
+        <div class="tab-content">
+            @foreach (var tab in tabDefinitions)
+            {
+                <div role="tabpanel" class="tab-pane @(tab.Active ? "active" : "")" id="@tab.Name">
+                    <div class="row">
+                        @foreach (var image in tab.Images)
+                        {
+                            <div class="col-md-4 review">
+                                <a href="@Url.Action("Details", new { id = image.Id })">
+                                    <div class="thumb" style="background-image: url(@image.MediaUrl)">
+                                        <div class="thumb-text">
+                                            @image.ReviewText
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

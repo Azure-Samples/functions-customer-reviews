@@ -1,0 +1,10 @@
+<configuration>
+	<VSTS>
+		<vstsUrl><YOUR VSTS ACCOUNT URL></vstsUrl>
+		<vstsToken>YOUR VSTS PAT TOKEN</vstsToken>
+		<workingFolder>c:\demo-git</workingFolder>
+		<projectName>Reviews</projectName>
+		<buildName>ReviewsBuild</buildName>
+		<buildDefinitionFilePath>assets\BuildDefinition.json</buildDefinitionFilePath>
+	</VSTS>
+</configuration>

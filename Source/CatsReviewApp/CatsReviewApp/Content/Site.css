@@ -1,0 +1,215 @@
+﻿body {
+    background-color: #fff;
+    color: #000;
+    text-align: center;
+}
+
+body, td, th {
+    font-family: "Segoe UI", "Segoe WP", Tahoma, Arial, sans-serif;
+    font-size: 16px;
+}
+
+a {
+    color: #07f;
+}
+
+    a:hover {
+        color: #07f;
+        text-decoration: underline;
+    }
+
+    a:focus {
+        outline: none;
+    }
+
+header, #content, footer {
+    max-width: 1170px;
+    min-width: 600px;
+    margin: auto;
+}
+
+header {
+    height: 64px;
+}
+
+#header_logo {
+    float: left;
+    height: 64px;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    text-align: center;
+    font-size: 16px;
+    line-height: 64px;
+}
+
+    #header_logo h1 {
+        ;
+    }
+
+    #header_logo img {
+        max-height: 64px;
+    }
+
+header nav {
+    height: 64px;
+}
+
+    header nav ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        line-height: 64px;
+    }
+
+        header nav ul li {
+            display: inline-block;
+            line-height: 32px;
+            padding: 0 20px;
+        }
+
+#content_wrapper {
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+}
+
+#content {
+    text-align: left;
+    padding-bottom: 16px;
+    min-height: 600px;
+}
+
+footer {
+    padding-top: 16px;
+}
+
+    footer span,
+    footer a {
+        display: inline-block;
+        margin-left: 24px;
+        font-size: 14px;
+        color: #666
+    }
+
+        footer a:hover {
+            color: #666;
+        }
+
+/* content styles */
+.button, .button:focus {
+    background: rgb(0, 119, 255);
+    padding: 10px;
+    color: white;
+    text-decoration: none;
+    text-align: center;
+    border: none;
+}
+
+    .button:hover {
+        opacity: .8;
+        color: white;
+        text-decoration: none;
+    }
+
+    .button .glyphicon {
+        margin-right: 10px;
+    }
+
+.header .button.back-button {
+    display: block;
+    width: 200px;
+    margin-left: auto;
+}
+
+
+/*
+    GRID PAGE STYLES
+*/
+
+.grid-page {
+    margin-top: 20px;
+}
+
+    .grid-page .button {
+        display: block;
+        width: 200px;
+        margin-left: auto;
+    }
+
+    .grid-page .review {
+        margin: 20px 0;
+        height: 250px;
+        overflow: hidden;
+    }
+
+        .grid-page .review .thumb {
+            height: 100%;
+            width: 100%;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+            .grid-page .review .thumb .thumb-text {
+                position: absolute;
+                bottom: -50px;
+                left: 0;
+                right: 0;
+                height: 50px;
+                padding: 15px;
+                color: white;
+                background: rgba(0,0,0,.5);
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                overflow: hidden;
+                transition: bottom ease-in-out .3s;
+            }
+
+            .grid-page .review .thumb:hover .thumb-text {
+                bottom: 0px;
+            }
+
+/*
+    CREATE PAGE STYLES
+*/
+
+.create-page {
+    margin-top: 50px;
+}
+
+    .create-page #upload-preview {
+        width: 100%;
+        padding-top: 100%;
+        position: relative;
+        background: #CCC;
+        cursor: pointer;
+        background-size: cover;
+        background-position: center;
+    }
+
+        .create-page #upload-preview.file-selected .no-image {
+            display: none;
+        }
+
+        .create-page #upload-preview .no-image {
+            position: absolute;
+            top: 42%;
+            width: 100%;
+            text-align: center;
+            font-size: 38px;
+            color: white;
+        }
+
+    .create-page .file-picker {
+        visibility: hidden;
+        position: absolute;
+    }
+
+    .create-page h2 {
+        margin: 0;
+        margin-bottom: 20px;
+    }
+
+    .create-page .button {
+        width: 150px;
+    }
