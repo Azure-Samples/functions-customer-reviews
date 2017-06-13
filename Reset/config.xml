@@ -1,12 +1,12 @@
 <configuration>
 	<!-- CLOUD SETTINGS -->
-	<storageConnectionString>DefaultEndpointsProtocol=https;AccountName=nzthidemozzstor;AccountKey=wt0xZc9uHwLCZrTd0+xTd2XYL1STyo+HnM9gkWjoQcalw6OAxX3OUxLE3Xmw3pgsnWv06LLpI6TGO71KAMHtGA==;EndpointSuffix=core.windows.net</storageConnectionString>
+	<storageConnectionString>YOURSTORAGECONNECTIONSTRING</storageConnectionString>
 	<containerName>input-images</containerName>
 	<queueName>review-queue</queueName>
 	<queueNameLocal>review-queue-local</queueNameLocal>
 
-	<documentDbEndpoint>https://nzthidemozzdocdb.documents.azure.com:443/</documentDbEndpoint>
-	<documentDbKey>yI4yTkT0KmxqLRMVUK7hI9kkKisiuGx64uOJEDOmMgBcvkx0rzNbUoh9x5fK0gcGK7JiJVvCimXYu1RCvhuPAA==</documentDbKey>
+	<documentDbEndpoint>YOURCOSMOSDBENDPOINT</documentDbEndpoint>
+	<documentDbKey>YOURCOSMOSDBKEY</documentDbKey>
 	<documentDbName>customerReviewData</documentDbName>
 	<documentDbCollName>reviews</documentDbCollName>
 	<documentDbPartKeyPath>/reviewId</documentDbPartKeyPath>
