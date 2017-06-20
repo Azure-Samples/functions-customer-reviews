@@ -1,5 +1,5 @@
 ---
-services: functions
+services: functions, app-service, cosmos-db, cognitive-services
 platforms: dotnet
 author: nzthiago
 ---
