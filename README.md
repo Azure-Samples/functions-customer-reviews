@@ -4,7 +4,7 @@ platforms: dotnet
 author: nzthiago
 ---
 
-# Sample - Azure Functions tools for Visual Studio 2017
+# Sample - Customer Reviews App with Cognitive Services (Azure Functions tools for Visual Studio 2017)
 
 This sample showcases the new Azure Functions tooling for C# Class Libraries in Visual Studio. It has a website where customers submit product reviews, stored in Azure storage blobs and CosmosDB; and an Azure Function to perform automated moderation of the customer reviews using Microsoft Cognitive Services. It uses an Azure storage queue to decouple the website from the function.
  
