@@ -17,7 +17,14 @@ Please [follow the Setup Instructions](SETUP.md) to get your environment configu
 ### Sample Architecture ###
 
 Here's a view of the architecture of the sample:
+
 ![](Media/Picture20.png)
+
+### Deliver as a Demo - Video ###
+
+If you are looking at delivering this as a demo, here's an example:
+
+[![VS 2017 Azure Functions Demo Video on YouTube](https://img.youtube.com/vi/r__XV__I21k/0.jpg)](https://www.youtube.com/watch?v=r__XV__I21k)
 
 ### Section 1: Azure Functions tools for Visual Studio 2017 ###
 
