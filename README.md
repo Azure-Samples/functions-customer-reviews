@@ -20,9 +20,11 @@ Here's a view of the architecture of the sample:
 
 ![](Media/Picture20.png)
 
-### Deliver as a Demo - Video ###
+### Deliver as a Demo ###
 
-If you are looking at delivering this as a demo, here's an example:
+**Here is the [demo script](DEMOSCRIPT.md)**.
+
+And here's an example recording of the demo:
 
 [![VS 2017 Azure Functions Demo Video on YouTube](https://img.youtube.com/vi/r__XV__I21k/0.jpg)](https://www.youtube.com/watch?v=r__XV__I21k)
 
