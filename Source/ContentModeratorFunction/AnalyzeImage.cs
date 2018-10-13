@@ -5,8 +5,9 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.Azure.CognitiveServices.Vision.ComputerVision;
+using Microsoft.Azure.CognitiveServices.Vision.ComputerVision.Models;
 using Microsoft.Azure.WebJobs;
-using Microsoft.ProjectOxford.Vision;
 using Newtonsoft.Json.Linq;
 
 namespace ContentModeratorFunction
@@ -18,7 +19,7 @@ namespace ContentModeratorFunction
         public static async Task ReviewImageAndText(
             [QueueTrigger("%queue-name%")]  ReviewRequestItem queueInput,
             [Blob("input-images/{BlobName}", FileAccess.Read)]  Stream image,
-            [DocumentDB("customerReviewData", "reviews", Id = "{DocumentId}", PartitionKey = "Reviews", ConnectionStringSetting = "customerReviewDataDocDB")]  dynamic inputDocument)
+            [CosmosDB("customerReviewData", "reviews", Id = "{DocumentId}", PartitionKey = "Reviews", ConnectionStringSetting = "customerReviewDataDocDB")]  dynamic inputDocument)
         {
             bool passesText = await PassesTextModeratorAsync(inputDocument);
 
@@ -31,8 +32,10 @@ namespace ContentModeratorFunction
 
         public static async Task<(bool, string)> PassesImageModerationAsync(Stream image)
         {
-            var client = new VisionServiceClient(ApiKey);
-            var result = await client.AnalyzeImageAsync(image, VisualFeatures);
+            var client = new ComputerVisionClient(
+                            new ApiKeyServiceClientCredentials(ApiKey),
+                            new DelegatingHandler[] { });
+            var result = await client.AnalyzeImageInStreamAsync(image, VisualFeatures);
 
             bool containsCat = result.Description.Tags.Take(5).Contains(SearchTag);
             string message = result?.Description?.Captions.FirstOrDefault()?.Text;
@@ -66,7 +69,7 @@ namespace ContentModeratorFunction
         private static readonly string ApiKey = Environment.GetEnvironmentVariable("MicrosoftVisionApiKey");
         static HttpClient httpClient = new HttpClient();
 
-        private static readonly VisualFeature[] VisualFeatures = { VisualFeature.Description };
+        private static readonly VisualFeatureTypes[] VisualFeatures = { VisualFeatureTypes.Description };
 
         public class ReviewRequestItem
         {
