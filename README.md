@@ -1,5 +1,6 @@
 ---
-languages: []
+languages:
+- csharp
 page_type: sample
 products:
 - azure
@@ -7,6 +8,9 @@ products:
 - azure-app-service
 - azure-cosmos-db
 - azure-cognitive-services
+description: "This sample showcases the new Azure Functions tooling for C# Class Libraries in Visual Studio."
+name: "Customer Reviews App with Cognitive Services"
+urlFragment: customer-reviews-cognitive-services
 ---
 
 # Sample - Customer Reviews App with Cognitive Services (Azure Functions tools for Visual Studio 2017)
