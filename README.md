@@ -1,7 +1,12 @@
 ---
-services: functions, app-service, cosmos-db, cognitive-services
-platforms: dotnet
-author: nzthiago
+languages: []
+page_type: sample
+products:
+- azure
+- azure-functions
+- azure-app-service
+- azure-cosmos-db
+- azure-cognitive-services
 ---
 
 # Sample - Customer Reviews App with Cognitive Services (Azure Functions tools for Visual Studio 2017)
