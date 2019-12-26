@@ -1,11 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Web;
+﻿using Microsoft.AspNetCore.Http;
+using System.ComponentModel.DataAnnotations;
 
 namespace CatsReviewApp.Models
 {
     public class CreateCatReview : CatReview
     {
         [Display(Name = "Image File")]
-        public HttpPostedFileBase Image { get; set; }
+        public IFormFile Image { get; set; }
     }
 }

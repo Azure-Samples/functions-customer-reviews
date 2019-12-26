@@ -1,22 +1,31 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Microsoft.ApplicationInsights;
+﻿using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Azure.CognitiveServices.Vision.ComputerVision;
 using Microsoft.Azure.CognitiveServices.Vision.ComputerVision.Models;
 using Microsoft.Azure.WebJobs;
 using Newtonsoft.Json.Linq;
+using System;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace ContentModeratorFunction
 {
     public class AnalyzeImage
     {
+        private readonly HttpClient httpClient;
+        private readonly TelemetryClient telemetryClient;
+
+        public AnalyzeImage(IHttpClientFactory httpClientFactory, TelemetryConfiguration telemetryConfiguration)
+        {
+            httpClient = httpClientFactory.CreateClient();
+            telemetryClient = new TelemetryClient(telemetryConfiguration);
+        }
+
         /// Function entry point. Review image and text and set inputDocument.isApproved.
         [FunctionName("ReviewImageAndText")]
-        public static async Task ReviewImageAndText(
+        public async Task ReviewImageAndText(
             [QueueTrigger("%queue-name%")]  ReviewRequestItem queueInput,
             [Blob("input-images/{BlobName}", FileAccess.Read)]  Stream image,
             [CosmosDB("customerReviewData", "reviews", Id = "{DocumentId}", PartitionKey = "Reviews", ConnectionStringSetting = "customerReviewDataDocDB")]  dynamic inputDocument)
@@ -30,25 +39,30 @@ namespace ContentModeratorFunction
             EmitCustomTelemetry(containsCat, passesText);
         }
 
-        public static async Task<(bool, string)> PassesImageModerationAsync(Stream image)
+        private async Task<(bool, string)> PassesImageModerationAsync(Stream image)
         {
             var client = new ComputerVisionClient(
-                            new ApiKeyServiceClientCredentials(ApiKey),
-                            new DelegatingHandler[] { });
+                new ApiKeyServiceClientCredentials(ApiKey),
+                httpClient,
+                false);
+
+            client.Endpoint = ApiRoot;
             var result = await client.AnalyzeImageInStreamAsync(image, VisualFeatures);
 
             bool containsCat = result.Description.Tags.Take(5).Contains(SearchTag);
             string message = result?.Description?.Captions.FirstOrDefault()?.Text;
+
             return (containsCat, message);
         }
 
-        public static async Task<bool> PassesTextModeratorAsync(dynamic document)
+        private async Task<bool> PassesTextModeratorAsync(dynamic document)
         {
-            if (document.ReviewText == null) {
+            if (document.ReviewText == null)
+            {
                 return true;
             }
 
-            string content = document.ReviewText;                
+            string content = document.ReviewText;
             StringContent stringContent = new StringContent(content);
             httpClient.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", Environment.GetEnvironmentVariable("ContentModerationApiKey"));
             var response = await httpClient.PostAsync(ApiUri, stringContent);
@@ -64,10 +78,10 @@ namespace ContentModeratorFunction
 
         #region Helpers
 
-        private static string ApiUri = "https://westus.api.cognitive.microsoft.com/contentmoderator/moderate/v1.0/ProcessText/Screen?language=eng";
         private static readonly string SearchTag = "cat";
+        private static readonly string ApiRoot = $"https://{Environment.GetEnvironmentVariable("AssetsLocation")}.api.cognitive.microsoft.com";
+        private static string ApiUri = $"{ApiRoot}/contentmoderator/moderate/v1.0/ProcessText/Screen?language=eng";
         private static readonly string ApiKey = Environment.GetEnvironmentVariable("MicrosoftVisionApiKey");
-        static HttpClient httpClient = new HttpClient();
 
         private static readonly VisualFeatureTypes[] VisualFeatures = { VisualFeatureTypes.Description };
 
@@ -77,18 +91,17 @@ namespace ContentModeratorFunction
             public string BlobName { get; set; }
         }
 
-        private static void EmitCustomTelemetry(bool passesImage, bool passesText)
+        private void EmitCustomTelemetry(bool passesImage, bool passesText)
         {
-            TelemetryClient telemetry = new TelemetryClient();
-            string key = TelemetryConfiguration.Active.InstrumentationKey = Environment.GetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY", EnvironmentVariableTarget.Process);
+            try
+            {
+                telemetryClient.Context.Operation.Name = "AnalyzeReview";
 
-            try {
-                telemetry.Context.Operation.Name = "AnalyzeReview";
+                telemetryClient.TrackMetric("ModerationResult", GetModerationResult(passesImage, passesText));
 
-                telemetry.TrackMetric("ModerationResult", GetModerationResult(passesImage, passesText));
-                
             }
-            catch {
+            catch
+            {
                 // avoid fail processing due to telemetry record saving issues
             }
         }

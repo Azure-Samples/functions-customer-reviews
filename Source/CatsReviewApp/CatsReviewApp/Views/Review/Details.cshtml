@@ -1,26 +1,7 @@
 ﻿@model CatsReviewApp.Models.CatReview
 
 @{
-    ViewBag.Title = "Cat Picture";
-
-    @helper GetStatusLabel(bool? isApproved)
-    {
-        if (isApproved.HasValue)
-        {
-            if (isApproved.Value)
-            {
-                <span class="text-success">Approved</span>
-            }
-            else
-            {
-                <span class="text-warning">Rejected</span>
-            }
-        }
-        else
-        {
-            <span class="text-muted">Pending</span>
-        }
-    }
+    ViewData["Title"] = "Cat Picture";
 }
 
 <style>
@@ -31,25 +12,23 @@
     .review-body {
         padding-top: 7em;
     }
-
-
 </style>
 
 <div class="container-fluid">
     <dev class="row header">
-        <div class="col-md-4 col-md-offset-8">
-            <a href="@Url.Action("Index")" class="button back-button">
+        <div class="col-md-4 offset-md-8">
+            <a asp-action="Index" class="button back-button">
                 <i class="glyphicon glyphicon-backward"></i> return to reviews
             </a>
         </div>
     </dev>
     <div class="row">
         <div class="col-md-6">
-            <img src="@Html.AttributeEncode(Model.MediaUrl)" title="@Model.ReviewText" class="picture" />
+            <img src="@Model.MediaUrl" title="@Model.ReviewText" class="picture" />
         </div>
         <div class="col-md-6 review-body">
             <p>
-                Status: <strong>@GetStatusLabel(Model.IsApproved)</strong>
+                Status: <strong>@await Component.InvokeAsync("StatusLabel", Model.IsApproved)</strong>
             </p>
             @if (!string.IsNullOrWhiteSpace(Model.Caption))
             {

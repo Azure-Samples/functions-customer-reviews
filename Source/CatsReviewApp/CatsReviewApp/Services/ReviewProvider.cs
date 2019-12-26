@@ -1,35 +1,40 @@
 ﻿namespace CatsReviewApp.Services
 {
+    using CatsReviewApp.Models;
+    using Microsoft.Azure.Documents;
+    using Microsoft.Azure.Documents.Client;
+    using Microsoft.Azure.Documents.Linq;
+    using Microsoft.Azure.Storage;
+    using Microsoft.Azure.Storage.Blob;
+    using Microsoft.Azure.Storage.Queue;
+    using Microsoft.Extensions.Configuration;
+    using Newtonsoft.Json;
     using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
-    using System.Web.Script.Serialization;
-    using CatsReviewApp.Models;
-    using Microsoft.Azure;
-    using Microsoft.Azure.Documents;
-    using Microsoft.Azure.Documents.Client;
-    using Microsoft.Azure.Documents.Linq;
-    using Microsoft.WindowsAzure.Storage;
-    using Microsoft.WindowsAzure.Storage.Queue;
 
     public class ReviewProvider
     {
         private readonly DocumentClient client;
         private readonly CloudStorageAccount storageAccount;
 
-        private readonly string documentDbName = CloudConfigurationManager.GetSetting("documentDbName");
-        private readonly string documentDbColl = CloudConfigurationManager.GetSetting("documentDbColl");
+        private readonly string documentDbName;
+        private readonly string documentDbColl;
+        private readonly string containerName;
+        private readonly string queueName;            
 
-        private readonly string containerName = CloudConfigurationManager.GetSetting("containerName");
-        private readonly string queueName = CloudConfigurationManager.GetSetting("queueName");
-
-        public ReviewProvider()
+        public ReviewProvider(IConfiguration configuration)
         {
-            this.client = new DocumentClient(new Uri(CloudConfigurationManager.GetSetting("documentDbEndpoint")), CloudConfigurationManager.GetSetting("documentDbKey"));
+            documentDbName = configuration.GetValue<string>("documentDbName");
+            documentDbColl = configuration.GetValue<string>("documentDbColl");
 
-            this.storageAccount = CloudStorageAccount.Parse(CloudConfigurationManager.GetSetting("storageAccountConnectionString"));
+            containerName = configuration.GetValue<string>("containerName");
+            queueName = configuration.GetValue<string>("queueName");
+
+            this.client = new DocumentClient(new Uri(configuration.GetValue<string>("documentDbEndpoint")), configuration.GetValue<string>("documentDbKey"));
+            this.storageAccount = CloudStorageAccount.Parse(configuration.GetValue<string>("storageAccountConnectionString"));
         }
 
         public async Task<IEnumerable<CatReview>> GetReviewsAsync()
@@ -73,7 +78,8 @@
             var queueClient = this.storageAccount.CreateCloudQueueClient();
             var queue = queueClient.GetQueueReference(this.queueName);
             var payload = new { BlobName = recordId.ToString(), DocumentId = recordId.ToString() };
-            queue.AddMessage(new CloudQueueMessage(new JavaScriptSerializer().Serialize(payload)));
+           
+            queue.AddMessage(new CloudQueueMessage(JsonConvert.SerializeObject(payload)));
             return recordId;
         }
 
