@@ -3,31 +3,33 @@ SAMPLE SETUP - Azure Functions tools for Visual Studio 2017
 This covers the pre-requisites and set up for the Azure Functions tools for Visual Studio 2017 sample.
 
 ## Setup ##
-Below are set up instructions for your computer, Azure, and Visual Studio Team Services.
+Below are set up instructions for your computer, Azure, and Azure DevOps.
 
 ## Machine Pre-requisites ##
 
 Install the following on your machine:
 
-- [Visual Studio 2017 Enterprise Update 3 Preview](https://www.visualstudio.com/vs/preview/) (Enterprise is used for the Live Unit Tests) with the following selected:
+- [Visual Studio Enterprise 2017 Update 3 or 2019](https://visualstudio.microsoft.com/downloads) (Enterprise is used for the Live Unit Tests) with the following selected:
     - ASP.NET and Web development
     - Azure development
     - .NET Core cross-platform development
-- [Latest Azure Functions tools for Visual Studio 2017](https://marketplace.visualstudio.com/vsgallery/e3705d94-7cc3-4b79-ba7b-f43f30774d28). When you first use this it will also install the Azure Functions CLI tools. 
-- [Microsoft .NET Framework 4.6.2 Developer Pack](http://getdotnet.azurewebsites.net/target-dotnet-platforms.html)
-- [Azure PowerShell](https://azure.microsoft.com/en-us/downloads/) or the [Azure CLI 2.0](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) (for the ARM template deployment)
+- [Azure PowerShell](https://docs.microsoft.com/en-us/powershell/azure/install-az-ps) or the [Azure CLI 2.0](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) (for the ARM template deployment)
 - [Git tools for Windows](https://git-scm.com/download/win)
+
+Only for Visual Studio 2017:
+
+- [Latest Azure Functions tools for Visual Studio 2017](https://marketplace.visualstudio.com/vsgallery/e3705d94-7cc3-4b79-ba7b-f43f30774d28). When you first use this it will also install the Azure Functions CLI tools. 
 - Optional: [Continuous Delivery Tools for Visual Studio](https://marketplace.visualstudio.com/items?itemName=VSIDEDevOpsMSFT.ContinuousDeliveryToolsforVisualStudio) 
 
 ---
 Notes: 
-- You can still use the sample with other editions of `Visual Studio 2017 Update 3 Preview` (like Community), but Live Unit Tests feature won't be available.
-- `Continuous Delivery Tools for Visual Studio` is needed to show the status of automated builds for your function, and is optional if you won't set up Visual Studio Team Services.
+- You can still use the sample with other editions of `Visual Studio' (like Community), but Live Unit Tests feature won't be available.
+- `Continuous Delivery Tools for Visual Studio` is needed to show the status of automated builds for your function, and is optional if you won't set up Azure DevOps.
 ---
 
 ## Fork the Repo and Clone it ##
 - Fork this repo to your own GitHub account
-- Clone your fork to a folder of your preferenceon  your machine. Or, if you downloded a zip file of the sample, expand the zip file to your preferred folder.
+- Clone your fork to a folder of your preference on your machine. Or, if you downloded a zip file of the sample, expand the zip file to your preferred folder.
 - Windows may block Powershell and Batch script execution if the OS determines the scripts originated from an untrusted source. To bypass this, run ``Get-ChildItem -Recurse -Path 'c:\Code' | Unblock-File`` (*replacing the path value with your target code root*).
 - In order to run non-digitally signed Powershell scripts you will need to run ``Set-ExecutionPolicy -ExecutionPolicy Unrestricted``.
 
@@ -81,7 +83,7 @@ Note:
 ## Deploy the Website Code ##
 
 Now let's deploy the Reviews site code to the Web App:
-- Open Visual Studio 2017 Update 3
+- Open Visual Studio
 - Open the ``CatsReviewApp.sln`` solution from the ``\Source\CatsReviewApp`` folder
 - Right click and build the web app in Visual Studio to ensure it is building working correctly
 - Right click the ``CatReviewsApp `` project and select ``Publish``. Follow the publish web app wizard to publish to an **existing App Service**, then choose the web app in the Reviews resource group in your Azure Subscription.
@@ -89,12 +91,12 @@ Now let's deploy the Reviews site code to the Web App:
 
 ![](Media/Setup4.png)
 
-## Optional: Visual Studio Team Services ##
+## Optional: Azure DevOps ##
 
-You can also create a VSTS build definition to trigger from a code commit. To get it set up, follow these instructions: 
-- Use an existing VSTS account or [create a new one](https://www.visualstudio.com/en-us/docs/setup-admin/team-services/sign-up-for-visual-studio-team-services)
+You can also create an Azure DevOps build definition to trigger from a code commit. To get it set up, follow these instructions: 
+- Use an existing Azure DevOps account or [create a new one](https://docs.microsoft.com/fr-fr/azure/devops/organizations/accounts/create-organization)
 - [Make sure you have Colin's ALM Corner Build & Release Tools installed on your VSTS account](https://marketplace.visualstudio.com/items?itemName=colinsalmcorner.colinsalmcorner-buildtasks)
-- [Create a Personal Access Token (PAT)](https://www.visualstudio.com/en-us/docs/setup-admin/team-services/use-personal-access-tokens-to-authenticate) and save the value.
+- [Create a Personal Access Token (PAT)](https://docs.microsoft.com/fr-fr/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate) and save the value.
 - Create a new Build Definition as documented in [this blog post](https://blogs.msdn.microsoft.com/appserviceteam/2017/06/01/deploying-visual-studio-2017-function-projects-with-vsts/) using your GitHub fork as the source
 - Create the following variables for your new build definitions:
     - AzureWebJobsStorage
@@ -147,6 +149,6 @@ You can also create a VSTS build definition to trigger from a code commit. To ge
 
 If you want to clean up the sample:
 - Delete the 'Reviews' resource group from your Azure subscription
-- Delete the 'Reviews' project from your Visual Studio Team Services account
+- Delete the 'Reviews' project from your Azure DevOps account
 - Delete the folder on your machine where you cloned the repo(s)
 - Delete the fork of the code from your GitHub account 
