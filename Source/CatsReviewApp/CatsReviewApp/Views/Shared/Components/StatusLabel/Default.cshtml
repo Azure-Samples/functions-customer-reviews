@@ -1,0 +1,17 @@
+﻿@model bool?
+
+@if (Model.HasValue)
+{
+    @if (Model.Value)
+    {
+        <span class="text-success">Approved</span>
+    }
+    else
+    {
+        <span class="text-warning">Rejected</span>
+    }
+}
+else
+{
+    <span class="text-muted">Pending</span>
+}

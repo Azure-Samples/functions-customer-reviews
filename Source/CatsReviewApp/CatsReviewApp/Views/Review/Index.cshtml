@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<CatsReviewApp.Models.CatReview>
 
 @{
-    ViewBag.Title = "Reviews";
+    ViewData["Title"] = "Reviews";
 
     var tabDefinitions = new[]
     {
@@ -13,7 +13,7 @@
 
 <div class="container-fluid grid-page">
     <div class="row">
-        <div class="col-md-4 col-md-offset-8">
+        <div class="col-md-4 offset-md-8">
             <a href="@Url.Action("Create")" class="button">
                 <i class="glyphicon glyphicon-plus"></i> add picture
             </a>
@@ -24,7 +24,9 @@
         <ul class="nav nav-tabs" role="tablist">
             @foreach (var tab in tabDefinitions)
             {
-                <li role="presentation" class="@(tab.Active ? "active" : "")"><a href="#@tab.Name" aria-controls="@tab.Name" role="tab" data-toggle="tab">@tab.Name (@tab.Images.Count)</a></li>
+                <li role="presentation" class="nav-item">
+                    <a class="@(tab.Active ? "nav-link active" : "nav-link")" href="#@tab.Name" aria-controls="@tab.Name" role="tab" data-toggle="tab">@tab.Name (@tab.Images.Count)</a>
+                </li>
             }
         </ul>
 

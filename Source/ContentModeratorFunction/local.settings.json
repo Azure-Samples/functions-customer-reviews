@@ -4,6 +4,7 @@
     "AzureWebJobsStorage": "__AzureWebJobsStorage__",
     "MicrosoftVisionApiKey": "__MicrosoftVisionApiKey__",
     "ContentModerationApiKey": "__ContentModerationApiKey__",
+    "AssetsLocation": "__AssetsLocation__",
     "customerReviewDataDocDB": "__customerReviewDataDocDB__",
     "APPINSIGHTS_INSTRUMENTATIONKEY": "__APPINSIGHTS_INSTRUMENTATIONKEY__",
     "queue-name": "review-queue"
