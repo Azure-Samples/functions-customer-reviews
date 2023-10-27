@@ -7,7 +7,7 @@ products:
 - azure-functions
 - azure-app-service
 - azure-cosmos-db
-- azure-cognitive-services
+- ai-services
 description: "This sample showcases the new Azure Functions tooling for C# Class Libraries in Visual Studio."
 name: "Customer Reviews App with Cognitive Services"
 urlFragment: customer-reviews-cognitive-services
